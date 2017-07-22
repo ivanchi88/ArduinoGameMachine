@@ -19,7 +19,8 @@ All game classes you make must inherit form the Game class as it has the display
 Games made and in development:
 
 [V] An space game shooter vs falling asteroids.
-\n [ ] A recreation of the PONG game.
+
+/n [ ] A recreation of the PONG game.
 
 
 
