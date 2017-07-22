@@ -6,9 +6,7 @@ The display I use is a 128x64 Oled SSD1306 display, the I2C model.
 I also use an analog joystick and a button (I use the joystick build-in button but others should work too)
 
 If you use the same model of display as I do, you can download here its specific library: https://github.com/adafruit/Adafruit_SSD1306
-
 If not, you have to find the right one.
-
 And regardless of the screen model you have to download the Adafruit gfx library: https://learn.adafruit.com/adafruit-gfx-graphics-library/overview and in github https://github.com/adafruit/Adafruit-GFX-Library
 
 
