@@ -16,5 +16,11 @@ If you add a new game you must add an element in the gameTable array, increase t
 All game classes you make must inherit form the Game class as it has the display and initialises it in its constructor.
 
 
+Games made and in development:
+
+[V] An space game shooter vs falling asteroids.
+[ ] A recreation of the PONG game.
+
+
 
 
