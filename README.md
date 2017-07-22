@@ -3,7 +3,7 @@ Its a simple software that can play small games on an Arduino (I've only tested 
 
 I've used an Arduino Uno compatible board to test it so it should run well on any other similar arduino board.
 The display I use is a 128x64 Oled SSD1306 display, the I2C model.
-I also use an analog joystick and a button (I use the build-in button but others should work too)
+I also use an analog joystick and a button (I use the joystick build-in button but others should work too)
 
 If you use the same model of display as I do, you can download here its specific library: https://github.com/adafruit/Adafruit_SSD1306
 If not, you have to find the right one.
