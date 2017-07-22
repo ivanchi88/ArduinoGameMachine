@@ -1,5 +1,5 @@
 # ArduinoGameMachine
-Its a simple software that can play simple games on an Arduino (I've only tested the uno).
+Its a simple software that can play small games on an Arduino (I've only tested the uno).
 
 I've used an Arduino Uno compatible board to test it so it should run well on any other similar arduino board.
 As the display I use a 128*64 px Oled SSD1306 display, the I2C model.
