@@ -1,11 +1,9 @@
 #include "Arduino.h"
 #include "GameMachine.h"
-//#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <stdlib.h>
-//#include <avr/pgmspace.h>
 
 // new
 void * operator new(size_t size) {
@@ -255,40 +253,47 @@ boolean SpaceGame::jugar(byte btn_pin, byte x_pin, byte y_pin) {
 				_display->clearDisplay();
 				level = MIN_LEVEL;
 				delay(3000);
-				byte exit = 1;
-				byte position = 0;
-				while (exit != 0) {
-
-					int xDir = analogRead(x_pin);
-					if ((xDir > 520) && (position == 1)) {
-						position--; //mover izq
-					} else if ((xDir < 480) && (position == 0)) {
-						position++; //mover dch
-					}
-					if (digitalRead(btn_pin) == 0) {
-						exit = 0;
-						replay = position != 1;
-					}
-
-					if (exit != 0) {
-						_display->setCursor(10, 20);
-						_display->print("CONTINUE?");
-						_display->setCursor(10 + position * 60, 40);
-						_display->print(">");
-						_display->setCursor(25, 40);
-						_display->print("YES");
-						_display->setCursor(85, 40);
-						_display->print("NO");
-						_display->display();
-						_display->clearDisplay();
-					}
-				}
-				_display->setTextSize(1);
+				replay = goToMenuScreen(btn_pin, x_pin);
 			}
 			resetGame();
 		}
 	}
 	return replay;
+}
+
+boolean Game::goToMenuScreen(byte btn_pin, byte x_pin)
+{
+	boolean replay;
+	_display->clearDisplay();
+					byte exit = 1;
+					byte position = 0;
+					while (exit != 0) {
+						int xDir = analogRead(x_pin);
+						if ((xDir > 520) && (position == 1)) {
+							position--; //mover izq
+						} else if ((xDir < 480) && (position == 0)) {
+							position++; //mover dch
+						}
+						if (digitalRead(btn_pin) == 0) {
+							exit = 0;
+							replay = position != 1; //si la posicion = 1 (NO) exit to menu
+						}
+
+						if (exit != 0) {
+							_display->setCursor(10, 20);
+							_display->print("CONTINUE?");
+							_display->setCursor(10 + position * 60, 40);
+							_display->print(">");
+							_display->setCursor(25, 40);
+							_display->print("YES");
+							_display->setCursor(85, 40);
+							_display->print("NO");
+							_display->display();
+							_display->clearDisplay();
+						}
+					}
+		_display->setTextSize(1);
+		return replay;
 }
 
 void SpaceGame::moverPlayer(byte btn_pin, byte x_pin, byte y_pin) {
@@ -425,44 +430,147 @@ void SpaceGame::drawUI() {
 }
 
 /**********************************************************************/
+PongBall::PongBall()
+{
+	randomSeed(analogRead(3));
+	reset();
+}
+
+byte PongBall::getX()
+{
+	return x;
+}
+byte PongBall::getY()
+{
+	return y;
+}
+char PongBall:: getXSpeed()
+{
+	return xSpeed;
+}
+char PongBall::getYSpeed()
+{
+	return ySpeed;
+}
+
+byte PongBall::getV()
+{
+	return v;
+}
+byte PongBall::getRadius()
+{
+	return radius;
+}
+void PongBall::setXSpeed(char xs)
+{
+	xSpeed = xs;
+}
+void PongBall::setYSpeed(char ys){
+	ySpeed = ys;
+}
+
+void PongBall::reset()
+{
+	x = 64;
+	y = 32;
+	v = 1;
+	xSpeed = -1;
+	ySpeed = -1;
+
+}
+
+void PongBall::move()
+{
+	if (xSpeed < 0)
+	{
+		x+= xSpeed - v;
+	}
+	else
+	{
+		x+= xSpeed + v;
+	}
+
+	if (ySpeed < 0)
+	{
+		y+= ySpeed - v;
+	}
+	else
+	{
+		y+= ySpeed + v;
+	}
+}
+
+void PongBall::draw(Adafruit_SSD1306 *display)
+{
+	//display->drawPixel(x, y, WHITE);
+	display->fillRect(x, y, radius, radius, WHITE);
+	//display->fillCircle(x, y, radius, WHITE);
+	//display->drawCircle(x, y, radius, WHITE);
+}
 
 /**********************************************************************/
 JugadorPong::JugadorPong(byte r)
 {
-	if (r == 0)
-	{
-		x = 14;
-	}
-	else
-	{
-		x = 114;
-	}
-	y = 30;
-	height = 10;
 	rol = r;
-	speed = 2;
+	reset();
+}
+
+byte JugadorPong::getX()
+{
+	return x;
+}
+byte JugadorPong::getY()
+{
+	return y;
+}
+byte JugadorPong::getHeight()
+{
+	return height;
+}
+byte JugadorPong::getWidth()
+{
+	return width;
 }
 
 void JugadorPong::move (byte yPin)
 {
 	if (!rol) //maquina
 	{
-
+		if ((yPin == 1) && (y > 1))
+		{
+			y-= speed;
+		} else if ((yPin == 2) && (y < 63 - height))
+		{
+			y+= speed;
+		}
 	} else //jugador
 	{
 		int yDir;
 		yDir = analogRead(yPin);
-		if ((yDir < 480) && (y > 0))
+		if ((yDir < 480) && (y > 1))
 		{
 			y-= speed;
 		}
-		else if ((yDir > 520) && (y < 64 - height))
+		else if ((yDir > 520) && (y < 63 - height))
 		{
 			y+= speed;
 		}
 	}
 }
 
+void JugadorPong::reset()
+{
+	if (rol == 0)
+	{
+		x = 18;
+	}
+	else
+	{
+		x = 110;
+	}
+	y = 30;
+	height = 10;
+}
 
 void JugadorPong:: draw(Adafruit_SSD1306 *display)
 {
@@ -477,14 +585,57 @@ PongGame::PongGame(Adafruit_SSD1306 &display) :
 		Game(display) {
 	jugadores[0] = new JugadorPong(0);
 	jugadores[1] = new JugadorPong(1);
-
+	puntosJugador = 0;
+	puntosMaquina = 0;
 }
 
 boolean PongGame::jugar (byte btn_pin, byte x_pin, byte y_pin)
 {
-	moveAll(y_pin);
-	draw();
-	return true;
+	boolean replay = true;
+	while (replay)
+	{
+		while (!checkCollitions())
+		{
+		draw();
+		moveAll(y_pin);
+		//delay(50);
+		}
+		_display->clearDisplay();
+		if (puntosJugador == maxPoints)
+		{
+			_display->setTextSize(2);
+			_display->setCursor(25, 20);
+			_display->print("YOU WON");
+			_display->setCursor(45, 35);
+			_display->print(puntosMaquina);
+			_display->print("  ");
+			_display->print(puntosJugador);
+			_display->display();
+			_display->clearDisplay();
+		}
+		else if (puntosMaquina == maxPoints)
+		{
+			_display->setTextSize(2);
+			_display->setCursor(25, 20);
+			_display->print("YOU LOST");
+			_display->setCursor(45, 35);
+			_display->print(puntosMaquina);
+			_display->print("  ");
+			_display->print(puntosJugador);
+			_display->display();
+			_display->clearDisplay();
+		}
+		if ((puntosMaquina == maxPoints) || (puntosJugador == maxPoints))
+		{
+			delay(3000);
+			replay = goToMenuScreen(btn_pin, x_pin);
+			puntosMaquina = 0;
+			puntosJugador = 0;
+		}
+
+		reset();
+	}
+	return replay;
 }
 
 
@@ -497,30 +648,125 @@ void PongGame:: drawPlayers()
 void PongGame:: drawGUI()
 {
 	_display->drawRect(0, 0, 128, 64, WHITE);
+	_display->setTextSize(1);
+	_display->setCursor(44, 5);
+	_display->print(puntosMaquina);
+	_display->setCursor(84, 5);
+	_display->print(puntosJugador);
 }
 
 void PongGame:: draw()
 {
 	_display->clearDisplay();
 	drawPlayers();
+	ball.draw(_display);
 	drawGUI();
 	_display->display();
 }
 
 void PongGame::moveAll(byte y_pin)
 {
+	ball.move();
 	movePlayers(y_pin);
 }
 void PongGame::movePlayers(byte y_pin)
 {
-	jugadores[0]->move(y_pin);
+	byte dir = 0;
+	if (ball.getX() < 80)
+	{
+		if ((ball.getY() + ball.getRadius() - 5) < jugadores[0]->getY())
+		{
+			dir = 1; //mover arriba
+		}
+		else if ((ball.getY() + ball.getRadius() + 5) > (jugadores[0]->getY() + (jugadores[0]->getHeight() >> 1)))
+		{
+			dir = 2; //mover abajo
+		}
+	}
+	jugadores[0]->move(dir);
 	jugadores[1]->move(y_pin);
 }
+void PongGame::moveBall()
+{
+	ball.move();
+}
 
+boolean PongGame::checkCollitions()  //devuelve true si hay un gol y ya hace lo de las colisiones
+{
+	boolean colision = false;
+	//colisiones con la pared de arriba y abajo
+	if ((ball.getYSpeed() < 0) && (ball.getY() < 2))
+	{
+		ball.setYSpeed(-ball.getYSpeed());
+	}
+	else if ((ball.getYSpeed() > 0) && (ball.getY() + ball.getRadius() > 62))
+	{
+		ball.setYSpeed(-ball.getYSpeed());
+	}
 
+	// Colisiones de la maquina
+	if (ball.getXSpeed() < 0) //Esta yendo a la izquierda
+	{
+		if ( (ball.getX() <= (jugadores[0]->getX() + jugadores[0]->getWidth() )) && (ball.getX() >= jugadores[0]->getX())) //esta entre el ancho de la pala
+		{
+			if ((ball.getY() <= jugadores[0]->getY() + jugadores[0]->getHeight()) && (ball.getY() >= jugadores[0]->getY()))
+			{
+				changeBallDirection(ball.getY(), jugadores[0]->getY(), jugadores[0]->getHeight());
+			}
+		}
+	}
+	//colisiones del jugador
+	if (ball.getXSpeed() > 0)
+	{
+		if ( ((ball.getX() + ball.getRadius()) <= (jugadores[1]->getX() + jugadores[1]->getWidth() )) && ((ball.getX() + ball.getRadius()) >= jugadores[1]->getX()))
+		{
+			if ((ball.getY() <= jugadores[1]->getY() + jugadores[1]->getHeight()) && (ball.getY() >= jugadores[1]->getY()))
+						{
+							changeBallDirection(ball.getY(), jugadores[1]->getY(), jugadores[1]->getHeight());
+						}
+		}
+	}
+	// colisiones de gol
+	if (ball.getX() < 5)
+	{
+		colision = true;
+		puntosJugador += 1;
+	} else if (ball.getX() > 123)
+	{
+		colision = true;
+		puntosMaquina +=1;
+	}
+	return colision;
+}
 
+void PongGame::changeBallDirection(byte yBall, byte yPlayer, byte heightPlayer)
+{
+	byte newSpeed = abs(yPlayer + (heightPlayer /2) - yBall);
+	if (ball.getXSpeed() < 0)
+	{
+		ball.setXSpeed( newSpeed/2 + ball.getV());
+	}
+	else
+	{
+		ball.setXSpeed(- (newSpeed/2 + ball.getV()));
+	}
+	if (ball.getYSpeed() < 0)
+	{
+		ball.setYSpeed(-(newSpeed/2 + ball.getV()));
+	}
+	else
+	{
+		ball.setYSpeed(newSpeed/2 + ball.getV());
+	}
 
+}
 
+void PongGame::reset()
+{
+	ball.reset();
+	jugadores[0]->reset();
+	jugadores[1]->reset();
+}
 /**********************************************************************/
 
 

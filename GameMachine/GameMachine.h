@@ -1,11 +1,9 @@
 #ifndef SpaceGame_h
 #define SpaceGame_h
 #include "Arduino.h"
-//#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-//#include <avr/pgmspace.h>
 
 class Disparo {
 private:
@@ -85,6 +83,7 @@ protected:
 	Adafruit_SSD1306 *_display; // puntero a la instancia del display
 public:
 	Game(Adafruit_SSD1306 &display);
+	boolean goToMenuScreen(byte btn_pin, byte x_pin);
 
 };
 
@@ -113,18 +112,44 @@ public:
 
 /**************************************************************************/
 
+class PongBall {
+	private:
+		byte x, y, v; //x, y, velocity,
+		char  xSpeed, ySpeed; //horizontal speed & vertical speed
+		#define radius 2
+	public:
+		PongBall();
+		byte getX();
+		byte getY();
+		char getXSpeed();
+		char getYSpeed();
+		byte getV();
+		byte getRadius();
 
+		void setXSpeed(char xs);
+		void setYSpeed(char ys);
+
+		void reset();
+		void move();
+		void draw(Adafruit_SSD1306 *display);
+
+};
 /**************************************************************************/
 class JugadorPong {
 private:
 	byte y, x, height, rol, speed; //rol es 0 maquina y 1 jugador
 #define width 2
+#define speed 2
 
 public:
 	JugadorPong (byte r);
-	void  draw(Adafruit_SSD1306 *display);
-	void JugadorPong::move (byte yPin);
-
+	byte getX();
+	byte getY();
+	byte getHeight();
+	byte getWidth();
+	void draw(Adafruit_SSD1306 *display);
+	void move (byte yPin);
+	void reset();
 };
 
 /**************************************************************************/
@@ -132,14 +157,21 @@ public:
 class PongGame : public Game{
 private:
 	JugadorPong *jugadores [2];
+	PongBall ball;
+	byte puntosJugador, puntosMaquina;
+#define maxPoints 3
 public:
 	PongGame (Adafruit_SSD1306 &display);
 	boolean jugar(byte btn_pin, byte x_pin, byte y_pin);
-	void PongGame:: drawPlayers();
-	void PongGame:: drawGUI();
-	void PongGame::movePlayers(byte y_pin);
-	void PongGame::moveAll(byte y_pin);
+	void drawPlayers();
+	void drawGUI();
 	void draw();
+	void movePlayers(byte y_pin);
+	void moveAll(byte y_pin);
+	void moveBall();
+	boolean checkCollitions(); //devuelve true si hay un gol y ya hace lo de las colisiones
+	void changeBallDirection(byte yBall, byte yPlayer, byte heightPlayer);
+	void reset();
 };
 
 
