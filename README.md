@@ -25,7 +25,9 @@ Games made and in development:
 
 [V] An space game shooter vs falling asteroids.
 
-[ ] A recreation of the PONG game.
+[V] A recreation of the PONG game.
+
+[ ] Another Game
 
 
 
